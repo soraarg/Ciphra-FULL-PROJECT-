@@ -162,6 +162,8 @@ Benjamin Soracco — CEO and Lead Programmer
 Ciro Castillo — CFO and Client Reception
 Juan Cerutti — QA
 Antigravity
+
+
 **Special Thanks**
 
 Special thanks to the **Goethe Schule Computer Science Department** for reviewing Ciphra and supporting the project’s first rollout phase.
