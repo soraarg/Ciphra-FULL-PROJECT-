@@ -1,0 +1,196 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mindshift by Ciphra</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <!-- League Spartan para el Logo/Títulos, Inter para el cuerpo -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=League+Spartan:wght@600;700&display=swap" rel="stylesheet">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <!-- Marked.js for Markdown -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <link rel="stylesheet" href="styles.css">
+    <script src="auth.js?v=2.1"></script>
+    <script>Auth.guard();</script>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-left">
+            <a href="index.html" class="logo">
+                <span class="logo-text">CIP<span class="logo-accent">H</span>RA</span>
+            </a>
+            <div class="app-name">Mindshift</div>
+        </div>
+        <a href="index.html" style="font-size:0.85rem; color: var(--text-muted); text-decoration:none;">← Volver</a>
+    </header>
+
+    <main id="app-container">
+        <!-- VISTA DE SETUP (Dashboard) -->
+        <section id="view-setup" class="view active">
+            <div class="dashboard-grid">
+                
+                <!-- Área principal de contenido -->
+                <div class="content-area glass-panel">
+                    <h2>¿Qué quieres estudiar hoy?</h2>
+                    <p class="subtitle">Escribe un tema, pega tus apuntes o sube una imagen.</p>
+                    
+                    <div class="input-group">
+                        <textarea id="topic-input" placeholder="Ej: La Revolución Industrial, o pega aquí el texto de tu resumen..."></textarea>
+                    </div>
+
+                    <div class="upload-area" id="upload-area">
+                        <i data-lucide="file-up"></i>
+                        <p>Haz clic o arrastra tus archivos aquí</p>
+                        <span class="upload-hint">Imágenes, PDFs, Word o Excel</span>
+                        <input type="file" id="file-upload" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" hidden>
+                    </div>
+                </div>
+
+                <!-- Panel de configuración -->
+                <aside class="settings-panel glass-panel">
+                    <h3>Configuración del Test</h3>
+                    
+                    <div class="setting-group">
+                        <label>Tipo de Preguntas</label>
+                        <select id="question-type">
+                            <option value="mixed">Mixto (Recomendado)</option>
+                            <option value="multiple">Múltiple Choice</option>
+                            <option value="boolean">Verdadero o Falso</option>
+                            <option value="fill">Completar Blancos</option>
+                            <option value="short">Respuesta Corta</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <label>Dificultad</label>
+                        <div class="segmented-control">
+                            <input type="radio" name="difficulty" id="diff-easy" value="easy">
+                            <label for="diff-easy">Fácil</label>
+                            
+                            <input type="radio" name="difficulty" id="diff-med" value="medium" checked>
+                            <label for="diff-med">Medio</label>
+                            
+                            <input type="radio" name="difficulty" id="diff-hard" value="hard">
+                            <label for="diff-hard">Difícil</label>
+                        </div>
+                    </div>
+
+                    <div class="setting-group">
+                        <label>Cantidad de Preguntas</label>
+                        <input type="range" id="question-count" min="3" max="20" value="5">
+                        <span class="range-value" id="count-display">5 preguntas</span>
+                    </div>
+
+                    <div class="setting-group toggle-group">
+                        <div class="toggle-info">
+                            <label for="exam-mode">Modo Examen</label>
+                            <span>Activa tiempo límite y bloquea ayudas.</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="exam-mode">
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <button id="btn-generate" class="primary-btn" onclick="if(window.runGenerateAI) window.runGenerateAI();">
+                        <i data-lucide="zap"></i> Generar Test Mágico
+                    </button>
+                </aside>
+            </div>
+        </section>
+
+        <!-- VISTA DEL MOTOR DE EXAMEN -->
+        <section id="view-exam" class="view hidden">
+            <div class="exam-header">
+                <div class="progress-container">
+                    <span id="question-progress">Pregunta 1 de 5</span>
+                    <div class="progress-bar"><div class="progress-fill" id="progress-fill"></div></div>
+                </div>
+                <div class="timer hidden" id="exam-timer">
+                    <i data-lucide="timer"></i> <span id="timer-display">15:00</span>
+                </div>
+            </div>
+
+            <div class="question-container glass-panel" id="question-container">
+                <!-- El contenido de la pregunta se inyecta aquí con JS -->
+            </div>
+
+            <div class="exam-actions">
+                <button id="btn-prev" class="secondary-btn" disabled>Anterior</button>
+                <button id="btn-next" class="primary-btn">Siguiente</button>
+                <button id="btn-finish" class="primary-btn hidden">Terminar Test</button>
+            </div>
+        </section>
+
+        <!-- VISTA DE RESULTADOS -->
+        <section id="view-results" class="view hidden">
+            <div class="results-header">
+                <h2>¡Test Completado!</h2>
+                <div class="score-circle">
+                    <svg viewBox="0 0 36 36" class="circular-chart">
+                        <path class="circle-bg" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <path class="circle" id="score-circle-path" stroke-dasharray="0, 100" d="M18 2.0845 a 15.9155 15.9155 0 0 1 0 31.831 a 15.9155 15.9155 0 0 1 0 -31.831" />
+                        <text x="18" y="20.5" class="percentage" id="score-text">0%</text>
+                    </svg>
+                </div>
+                <p id="score-message">Calculando resultados...</p>
+            </div>
+
+            <div class="results-grid">
+                <div class="review-panel glass-panel">
+                    <h3>Revisión de Respuestas</h3>
+                    <div id="answers-review-list" class="answers-list">
+                        <!-- Lista de respuestas inyectadas por JS -->
+                    </div>
+                </div>
+
+                <div class="recommendations-panel glass-panel">
+                    <h3>La IA recomienda repasar:</h3>
+                    <ul id="recommendations-list" class="recommendations-list">
+                        <!-- Recomendaciones inyectadas por JS -->
+                    </ul>
+                    <button id="btn-restart" class="primary-btn mt-4">
+                        <i data-lucide="rotate-ccw"></i> Empezar nuevo test
+                    </button>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <!-- COMMANDER Floating Copilot -->
+    <button id="btn-commander" class="commander-fab">
+        <svg class="helmet-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 0 0-10 10v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a10 10 0 0 0-10-10z" />
+            <path d="M6 12h12" />
+        </svg>
+    </button>
+
+    <div id="commander-window" class="commander-window hidden">
+        <div class="commander-header">
+            <div class="commander-title">
+                <svg class="helmet-icon-small" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 2a10 10 0 0 0-10 10v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a10 10 0 0 0-10-10z" />
+                    <path d="M6 12h12" />
+                </svg>
+                <span><strong>Ciphra COMMANDER 1.1</strong></span>
+            </div>
+            <button id="btn-close-commander" class="icon-btn"><i data-lucide="x"></i></button>
+        </div>
+        <div class="commander-body" id="commander-chat">
+            <div class="message ai-message">
+                <p>Hola. Soy <strong>Ciphra COMMANDER 1.1</strong>.</p>
+                <p>Estoy aquí para asistirte con precisión de ingeniería. ¿En qué puedo ayudarte hoy?</p>
+            </div>
+        </div>
+        <div class="commander-input">
+            <input type="text" id="commander-input-field" placeholder="Pregúntale a COMMANDER...">
+            <button id="btn-send-commander"><i data-lucide="send"></i></button>
+        </div>
+    </div>
+
+    <script src="app.js?v=2.1"></script>
+</body>
+</html>

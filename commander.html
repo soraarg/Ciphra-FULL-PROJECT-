@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ciphra COMMANDER | Next-Gen AI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=League+Spartan:wght@700;800;900&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="commander.css">
+    <!-- Motores de Renderizado -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script id="MathJax-script" async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-mml-chtml.js"></script>
+</head>
+<body>
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="logo-section">
+            <a href="index.html" style="text-decoration: none;">
+                <div class="logo-text">CIP<span class="logo-accent">H</span>RA</div>
+            </a>
+        </div>
+        
+        <button class="new-chat-btn" onclick="createChat()">
+            <i data-lucide="plus"></i> Nuevo chat
+        </button>
+
+        <div class="chat-list" id="chatList">
+            <!-- Chats dinámicos aquí -->
+        </div>
+
+        <div style="margin-top: auto; padding-top: 1rem; border-top: 1px solid var(--glass-border);">
+            <a href="quantum.html" style="color: var(--text-dim); text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 8px;">
+                <i data-lucide="atom" style="width: 16px;"></i> Ir a Quantum
+            </a>
+            <a href="index.html" style="color: var(--text-dim); text-decoration: none; font-size: 0.85rem; display: flex; align-items: center; gap: 8px; margin-top: 12px;">
+                <i data-lucide="home" style="width: 16px;"></i> Inicio
+            </a>
+        </div>
+    </aside>
+
+    <!-- Main Chat Area -->
+    <main class="main-chat">
+        <div class="topbar">
+            <div id="activeChatTitle" style="font-weight: 600; color: var(--text-bright);">Selecciona un chat</div>
+            <div class="nominal-badge">🟢 NOMINAL</div>
+        </div>
+
+        <div class="chat-container" id="chatContainer">
+            <!-- Mensajes dinámicos aquí -->
+            <div style="text-align: center; color: var(--text-dim); margin-top: 20vh;">
+                <i data-lucide="cpu" style="width: 40px; height: 40px; margin-bottom: 1rem;"></i>
+                <h2>COMMANDER 1.2</h2>
+                <p>Sistemas listos para operación técnica.</p>
+            </div>
+        </div>
+
+        <div class="input-area">
+            <div class="input-box">
+                <textarea id="userInput" placeholder="Escribe un mensaje técnico..." onkeydown="handleKey(event)"></textarea>
+                <button class="send-btn" onclick="sendMessage()">
+                    <i data-lucide="send"></i>
+                </button>
+            </div>
+        </div>
+    </main>
+
+    <script src="commander.js"></script>
+    <script>lucide.createIcons();</script>
+</body>
+</html>

@@ -1,0 +1,221 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ciphra | Ingeniería del Aprendizaje</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=League+Spartan:wght@500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="ciphra.css">
+</head>
+<body>
+    <!-- Navbar -->
+    <nav class="navbar">
+        <div class="logo">
+            <span class="logo-text">CIP<span class="logo-accent">H</span>RA</span>
+        </div>
+        <div class="nav-links">
+            <a href="#vision">Visión</a>
+            <a href="#productos">Modelos</a>
+            <a href="login.html" class="nav-link">Iniciar Sesión</a>
+            <a href="mailto:contacto@ciphra.ai" class="contact-btn">Contacto</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <header class="hero" id="vision">
+        <div class="hero-content">
+            <div class="badge"><i data-lucide="cpu" style="width: 14px; margin-right: 6px;"></i> Powered by COMMANDER (Core 0.1)</div>
+            <h1 class="hero-title">
+                Precisión en el <br>
+                <span class="highlight">Aprendizaje.</span>
+            </h1>
+            <p class="hero-subtitle">
+                Nuestro nombre proviene de "cifra". Representa los números, la exactitud y la ingeniería. En <strong>Ciphra</strong>, construimos modelos de inteligencia artificial diseñados específicamente para optimizar y revolucionar el aprendizaje interactivo en ingeniería y ciencias exactas.
+            </p>
+            
+            <div style="font-family: var(--font-logo); font-weight: 700; font-size: 1.5rem; letter-spacing: 0.15em; margin-bottom: 2.5rem;">
+                FOREVER, <span style="color: var(--ciphra-yellow);">BETTER</span>
+            </div>
+            <div class="hero-actions">
+                <a href="#productos" class="btn-primary">
+                    Explorar Modelos <i data-lucide="arrow-down"></i>
+                </a>
+            </div>
+        </div>
+        
+        <!-- Ambient Orbit Visual -->
+        <div class="hero-visual">
+            <svg class="hero-orbit-anim" viewBox="0 0 200 200" fill="none" stroke="#ffffff" stroke-width="1.5">
+                <!-- Concentric Orbits -->
+                <circle cx="100" cy="100" r="80" stroke-dasharray="4 6" opacity="0.3"></circle>
+                <circle cx="100" cy="100" r="55" opacity="0.4"></circle>
+                <circle cx="100" cy="100" r="30" opacity="0.5"></circle>
+                
+                <!-- Orbiting Planets -->
+                <g class="orbit-p1"><circle cx="100" cy="20" r="4" fill="#ffffff" stroke="none"></circle></g>
+                <g class="orbit-p2"><circle cx="100" cy="45" r="3" fill="#ffffff" stroke="none"></circle></g>
+                <g class="orbit-p3"><circle cx="100" cy="70" r="2" fill="#ffffff" stroke="none"></circle></g>
+                
+                <!-- Central Core -->
+                <circle cx="100" cy="100" r="6" fill="var(--ciphra-yellow)" stroke="none"></circle>
+            </svg>
+        </div>
+    </header>
+
+    <!-- Products / Models Section -->
+    <section class="products" id="productos">
+        <div class="section-header">
+            <h2>Nuestros Modelos</h2>
+            <p>Herramientas de próxima generación para mentes de ingeniería.</p>
+        </div>
+
+        <div class="models-grid">
+            <!-- Mindshift Card -->
+            <div class="model-card glass-card">
+                <div class="model-badge">Modelo 01</div>
+                <div class="model-icon">
+                    <i data-lucide="brain-circuit"></i>
+                </div>
+                <h3>Mindshift</h3>
+                <p>Nuestra primera plataforma interactiva. Transforma cualquier texto, documento PDF o imagen de apuntes en simulaciones de exámenes dinámicos para reforzar la retención de información técnica.</p>
+                
+                <div class="model-features">
+                    <span><i data-lucide="check-circle-2"></i> Exámenes Generativos</span>
+                    <span><i data-lucide="check-circle-2"></i> Análisis OCR de Gráficos</span>
+                    <span><i data-lucide="check-circle-2"></i> Retroalimentación IA</span>
+                </div>
+
+                <a href="mindshift.html" class="btn-launch">
+                    <i data-lucide="rocket"></i> Lanzar Mindshift
+                </a>
+            </div>
+
+            <!-- Quantum Card -->
+            <div class="model-card glass-card">
+                <div class="model-badge">Modelo 02</div>
+                <div class="model-icon">
+                    <i data-lucide="layers"></i>
+                </div>
+                <h3>Quantum</h3>
+                <p>Resolución analítica por pasos. Plantea problemas complejos de física, cálculo o ingeniería y obtén un desglose riguroso con fundamentos teóricos y fórmulas precisas.</p>
+                
+                <div class="model-features">
+                    <span><i data-lucide="check-circle-2"></i> Desglose Paso a Paso</span>
+                    <span><i data-lucide="check-circle-2"></i> Notación Técnica LaTeX</span>
+                    <span><i data-lucide="check-circle-2"></i> Fundamentos Físicos</span>
+                </div>
+
+                <a href="quantum.html" class="btn-launch">
+                    <i data-lucide="layers"></i> Lanzar Quantum
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-brand">
+                <div class="logo">
+                    <span class="logo-text">CIP<span class="logo-accent">H</span>RA</span>
+                </div>
+                <p>Ingeniería y precisión aplicada a la mente humana.</p>
+            </div>
+            <div class="footer-legal">
+                <p>&copy; 2026 Ciphra Technologies. Todos los derechos reservados.</p>
+            </div>
+        </div>
+    <!-- COMMANDER Link (Full SaaS) -->
+    <button id="btn-commander" class="commander-fab" onclick="window.location.href='commander.html'" style="width: 65px; height: 65px; border-radius: 50%; background: var(--ciphra-yellow); color: #000; display: flex; align-items: center; justify-content: center; box-shadow: 0 4px 20px rgba(255, 204, 0, 0.4); cursor: pointer; border: none; position: fixed; bottom: 30px; right: 30px; z-index: 9999; transition: transform 0.3s;">
+        <svg class="helmet-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="width: 32px; height: 32px;">
+            <path d="M12 2a10 10 0 0 0-10 10v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a10 10 0 0 0-10-10z" />
+            <path d="M6 12h12" />
+        </svg>
+    </button>
+
+    <script src="auth.js?v=2.1"></script>
+    <script src="app.js?v=2.1"></script>
+    <script>
+        // Check auth state for UI
+        async function updateNav() {
+            try {
+                if (typeof lucide === 'undefined') return;
+                
+                const isAuth = await Auth.check();
+                const navLinks = document.querySelector('.nav-links');
+                if (isAuth && navLinks) {
+                    const user = Auth.getUser();
+                    const loginLink = navLinks.querySelector('a[href="login.html"]');
+                    if (loginLink) {
+                        loginLink.innerHTML = `<i data-lucide="user" style="width:14px; margin-right:5px"></i> ${user.email.split('@')[0]}`;
+                        loginLink.href = "#";
+                        loginLink.onclick = (e) => {
+                            e.preventDefault();
+                            if(confirm('¿Cerrar sesión?')) Auth.logout();
+                        };
+                        lucide.createIcons();
+                    }
+                }
+            } catch (e) { console.error("Nav Update Fail", e); }
+        }
+        
+        window.addEventListener('DOMContentLoaded', () => {
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            updateNav();
+        });
+
+        function addCommanderMessage(text, isUser = false) {
+            const chat = document.getElementById('commander-chat');
+            if (!chat) return;
+            const div = document.createElement('div');
+            div.className = `message ${isUser ? 'user-message' : 'ai-message'}`;
+            div.innerHTML = `<p>${text}</p>`;
+            chat.appendChild(div);
+            chat.scrollTop = chat.scrollHeight;
+            return div;
+        }
+
+        // Motor de Envío Independiente para Sora
+        async function sendMessage() {
+            const input = document.getElementById('commander-input-field');
+            const chat = document.getElementById('commander-chat');
+            if (!input || !chat) return;
+
+            const text = input.value.trim();
+            if (!text) return;
+
+            // Mostrar mensaje del usuario
+            addCommanderMessage(text, true);
+            input.value = '';
+            chat.scrollTop = chat.scrollHeight;
+
+            // Mostrar "Pensando..."
+            const thinkingDiv = document.createElement('div');
+            thinkingDiv.className = 'message ai-message';
+            thinkingDiv.innerHTML = '<p>...</p>';
+            chat.appendChild(thinkingDiv);
+
+            try {
+                const token = localStorage.getItem('ciphra_token');
+                const response = await fetch('/api/commander/chat', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': token || ""
+                    },
+                    body: JSON.stringify({ message: text, context: "Inicio" })
+                });
+                const data = await response.json();
+                thinkingDiv.innerHTML = `<p>${data.response}</p>`;
+            } catch (e) {
+                console.error("Commander Error:", e);
+                thinkingDiv.innerHTML = `<p>⚠️ **ERROR DE ENLACE**: No se pudo establecer comunicación con el núcleo.</p>`;
+            }
+            chat.scrollTop = chat.scrollHeight;
+        }
+    </script>
+</body>
+</html>

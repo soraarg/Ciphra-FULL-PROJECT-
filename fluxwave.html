@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FluxWave by Ciphra — Editor de Diagramas</title>
+    <meta name="description"
+        content="FluxWave: Editor de diagramas interactivo. Crea flowcharts y sistemas complejos con precisión.">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=League+Spartan:wght@600;700&display=swap"
+        rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="fluxwave.css">
+    <script src="auth.js"></script>
+    <script>Auth.guard();</script>
+</head>
+
+<body class="liquid-glass-theme">
+
+    <!-- Header -->
+    <header class="editor-header">
+        <div class="header-left">
+            <a href="index.html" class="logo">CIP<span class="logo-accent">H</span>RA</a>
+            <div class="app-name">FluxWave</div>
+        </div>
+        <div class="header-center">
+            <input type="text" id="diagram-title" value="FluxWave Project" class="title-input" spellcheck="false">
+        </div>
+        <div class="header-right">
+            <button class="header-btn" id="btn-undo" title="Deshacer (Ctrl+Z)"><i data-lucide="undo-2"></i></button>
+            <button class="header-btn" id="btn-redo" title="Rehacer (Ctrl+Y)"><i data-lucide="redo-2"></i></button>
+            <div class="header-divider"></div>
+            <button class="header-btn" id="btn-export-png" title="Exportar como SVG"><i data-lucide="download"></i>
+                Exportar</button>
+            <a href="index.html" class="header-btn-link">← Salir</a>
+        </div>
+    </header>
+
+    <div class="editor-layout">
+
+        <!-- Left Sidebar: Shape Palette -->
+        <aside class="shape-palette">
+            <div class="palette-section">
+                <div class="palette-label">Formas</div>
+                <div class="shape-btns">
+                    <button class="shape-btn" data-type="start" title="Inicio / Fin">
+                        <svg viewBox="0 0 80 36" width="60" height="28">
+                            <rect x="1" y="1" width="78" height="34" rx="17" fill="#FFD700" stroke="#ccad00"
+                                stroke-width="1.5" />
+                            <text x="40" y="19" text-anchor="middle" dominant-baseline="middle" font-size="10"
+                                font-family="Inter" font-weight="600" fill="#09090b">Inicio/Fin</text>
+                        </svg>
+                    </button>
+                    <button class="shape-btn" data-type="process" title="Proceso">
+                        <svg viewBox="0 0 80 36" width="60" height="28">
+                            <rect x="1" y="1" width="78" height="34" rx="6" fill="#27272a" stroke="#3f3f46"
+                                stroke-width="1.5" />
+                            <text x="40" y="19" text-anchor="middle" dominant-baseline="middle" font-size="10"
+                                font-family="Inter" font-weight="500" fill="#fafafa">Proceso</text>
+                        </svg>
+                    </button>
+                    <button class="shape-btn" data-type="decision" title="Decisión">
+                        <svg viewBox="0 0 80 44" width="60" height="32">
+                            <polygon points="40,2 79,22 40,42 1,22" fill="#1e1b4b" stroke="#4338ca"
+                                stroke-width="1.5" />
+                            <text x="40" y="23" text-anchor="middle" dominant-baseline="middle" font-size="9"
+                                font-family="Inter" font-weight="500" fill="#c7d2fe">Decisión</text>
+                        </svg>
+                    </button>
+                    <button class="shape-btn" data-type="io" title="Entrada/Salida">
+                        <svg viewBox="0 0 80 36" width="60" height="28">
+                            <polygon points="14,1 79,1 66,35 1,35" fill="#14532d" stroke="#16a34a" stroke-width="1.5" />
+                            <text x="40" y="19" text-anchor="middle" dominant-baseline="middle" font-size="10"
+                                font-family="Inter" font-weight="500" fill="#bbf7d0">E / S</text>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+
+            <div class="palette-section">
+                <div class="palette-label">Herramientas</div>
+                <div class="tool-btns">
+                    <button class="tool-btn active" id="tool-select" data-tool="select" title="Seleccionar (V)">
+                        <i data-lucide="mouse-pointer-2"></i> Seleccionar
+                    </button>
+                    <button class="tool-btn" id="tool-connect" data-tool="connect" title="Conectar (C)">
+                        <i data-lucide="git-merge"></i> Conectar
+                    </button>
+                </div>
+            </div>
+
+            <div class="palette-section">
+                <div class="palette-label">Canvas</div>
+                <div class="tool-btns">
+                    <button class="tool-btn" id="btn-fit-view">
+                        <i data-lucide="maximize-2"></i> Ajustar
+                    </button>
+                    <button class="tool-btn danger" id="btn-clear">
+                        <i data-lucide="trash-2"></i> Limpiar
+                    </button>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Canvas -->
+        <div class="canvas-wrapper">
+            <svg id="diagram-svg" class="diagram-svg">
+                <defs>
+                    <pattern id="editor-grid" width="30" height="30" patternUnits="userSpaceOnUse">
+                        <circle cx="1" cy="1" r="1" fill="rgba(255, 215, 0, 0.1)" />
+                    </pattern>
+                    <marker id="arrow-normal" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#52525b" />
+                    </marker>
+                    <marker id="arrow-selected" markerWidth="10" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 10 3.5, 0 7" fill="#FFD700" />
+                    </marker>
+                    <filter id="shadow-node">
+                        <feDropShadow dx="0" dy="2" stdDeviation="6" flood-color="rgba(0,0,0,0.6)" />
+                    </filter>
+                    <filter id="shadow-selected">
+                        <feDropShadow dx="0" dy="0" stdDeviation="8" flood-color="rgba(255,215,0,0.4)" />
+                    </filter>
+                </defs>
+                <rect width="100%" height="100%" fill="transparent" />
+                <rect width="100%" height="100%" fill="url(#editor-grid)" id="grid-layer" />
+                <g id="edges-layer"></g>
+                <g id="nodes-layer"></g>
+                <g id="temp-layer"></g>
+            </svg>
+
+            <div class="zoom-indicator" id="zoom-indicator">100%</div>
+        </div>
+
+        <!-- Right Sidebar: Properties -->
+        <aside class="properties-panel" id="properties-panel">
+            <div class="props-header">Propiedades</div>
+            <div class="props-empty" id="props-empty">
+                <i data-lucide="mouse-pointer-2"></i>
+                <p>Selecciona un elemento para editar.</p>
+            </div>
+            <div class="props-content hidden" id="props-content">
+                <div class="prop-group">
+                    <label class="prop-label">Texto</label>
+                    <textarea id="prop-text" class="prop-input" rows="3"></textarea>
+                </div>
+                <div class="prop-group">
+                    <label class="prop-label">Relleno</label>
+                    <div class="color-swatches" id="color-swatches"></div>
+                </div>
+                <button class="delete-btn" id="btn-delete-selected"><i data-lucide="trash-2"></i> Eliminar</button>
+            </div>
+        </aside>
+
+    </div>
+
+    <!-- Inline Text Editor (overlay) -->
+    <div id="text-editor-overlay" class="text-editor-overlay hidden">
+        <textarea id="text-editor-input" class="text-editor-input" rows="2"></textarea>
+    </div>
+
+    <script src="diagram-editor.js"></script>
+</body>
+
+</html>

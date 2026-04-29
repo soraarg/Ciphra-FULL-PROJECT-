@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Configurar COMMANDER | Ciphra</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=League+Spartan:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <link rel="stylesheet" href="ciphra.css">
+    <style>
+        .onboarding-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            background: radial-gradient(circle at 50% 50%, #1a1a2e 0%, #09090b 100%);
+        }
+
+        .setup-card {
+            max-width: 600px;
+            width: 100%;
+        }
+
+        .step-indicator {
+            display: flex;
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .step-dot {
+            height: 4px;
+            flex: 1;
+            background: var(--border-light);
+            border-radius: 2px;
+        }
+
+        .step-dot.active {
+            background: var(--ciphra-yellow);
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        h2 { font-size: 1.8rem; margin-bottom: 0.5rem; letter-spacing: -0.02em; }
+        p.subtitle { color: var(--text-secondary); margin-bottom: 2.5rem; }
+
+        .config-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .option-group {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+
+        label {
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+            color: var(--text-muted);
+            font-weight: 600;
+        }
+
+        select, input {
+            background: rgba(255,255,255,0.03);
+            border: 1px solid var(--border-light);
+            padding: 0.8rem;
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-family: var(--font-ui);
+            transition: all 0.2s;
+        }
+
+        select:focus, input:focus {
+            outline: none;
+            border-color: var(--ciphra-yellow);
+            background: rgba(255,255,255,0.08);
+        }
+
+        .personality-preview {
+            background: rgba(255, 215, 0, 0.05);
+            border-left: 3px solid var(--ciphra-yellow);
+            padding: 1.5rem;
+            border-radius: 0 12px 12px 0;
+            margin-top: 2rem;
+            font-style: italic;
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+        }
+
+        .btn-finish {
+            width: 100%;
+            padding: 1.2rem;
+            background: var(--ciphra-yellow);
+            color: var(--bg-base);
+            border: none;
+            border-radius: 12px;
+            font-weight: 700;
+            font-size: 1rem;
+            cursor: pointer;
+            margin-top: 2rem;
+            transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-finish:hover {
+            transform: scale(1.02);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.3);
+        }
+    </style>
+</head>
+<body>
+    <div class="onboarding-page">
+        <div class="setup-card glass-card">
+            <div class="step-indicator">
+                <div class="step-dot active"></div>
+                <div class="step-dot active"></div>
+                <div class="step-dot active"></div>
+            </div>
+
+            <h2>Personaliza tu experiencia</h2>
+            <p class="subtitle">COMMANDER se adaptará a tu estilo de aprendizaje.</p>
+
+            <form id="onboarding-form">
+                <div class="form-group" style="margin-bottom: 2rem;">
+                    <label>¿Cómo quieres que te llame COMMANDER?</label>
+                    <input type="text" id="nickname" placeholder="Ej: Capitán, Estudiante, Colega..." style="width: 100%; margin-top: 0.5rem;" required>
+                </div>
+
+                <div class="config-grid">
+                    <div class="option-group">
+                        <label>Idioma de Interfaz</label>
+                        <select id="language">
+                            <option value="es">Español</option>
+                            <option value="en">English</option>
+                            <option value="de">Deutsch</option>
+                        </select>
+                    </div>
+
+                    <div class="option-group">
+                        <label>Tono de Voz</label>
+                        <select id="tone">
+                            <option value="professional">Profesional / Académico</option>
+                            <option value="casual">Casual / Amistoso</option>
+                            <option value="engineering">Ingeniería Rigurosa</option>
+                            <option value="minimalist">Minimalista / Directo</option>
+                        </select>
+                    </div>
+
+                    <div class="option-group">
+                        <label>Personalidad</label>
+                        <select id="personality">
+                            <option value="mentor">Mentor Paciente</option>
+                            <option value="challenging">Desafiante / Competitivo</option>
+                            <option value="sarcastic">Irónico / Sarcástico</option>
+                            <option value="enthusiastic">Entusiasta / Motivador</option>
+                        </select>
+                    </div>
+
+                    <div class="option-group">
+                        <label>Nivel de Detalle</label>
+                        <select id="detail">
+                            <option value="low">Resumido</option>
+                            <option value="med">Equilibrado</option>
+                            <option value="high">Explicativo / Profundo</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="personality-preview" id="preview-text">
+                    "Hola. Soy COMMANDER. Estoy listo para optimizar tu aprendizaje."
+                </div>
+
+                <button type="submit" class="btn-finish">
+                    Activar Protocolo <i data-lucide="zap"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        lucide.createIcons();
+
+        const form = document.getElementById('onboarding-form');
+        const preview = document.getElementById('preview-text');
+
+        // Actualizar preview dinámicamente
+        const updatePreview = () => {
+            const nick = document.getElementById('nickname').value || "Usuario";
+            const tone = document.getElementById('tone').value;
+            const personality = document.getElementById('personality').value;
+
+            let msg = "";
+            if (personality === 'mentor') msg = `Excelente decisión, ${nick}. Vamos a descomponer este problema paso a paso para que lo domines por completo.`;
+            else if (personality === 'challenging') msg = `¿Listo para la prueba real, ${nick}? No acepto errores comunes. Demuestra tu precisión.`;
+            else if (personality === 'sarcastic') msg = `Vaya, ${nick}. Otra vez por aquí. Espero que esta vez las leyes de la termodinámica no te ganen.`;
+            else msg = `¡Qué increíble tenerte de vuelta, ${nick}! ¡Hoy vamos a lograr cosas espectaculares en tu estudio! 🚀`;
+
+            preview.innerText = `"${msg}"`;
+        };
+
+        form.addEventListener('input', updatePreview);
+
+        form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const profile = {
+                nickname: document.getElementById('nickname').value,
+                language: document.getElementById('language').value,
+                tone: document.getElementById('tone').value,
+                personality: document.getElementById('personality').value,
+                detail: document.getElementById('detail').value
+            };
+
+            const user = Auth.getUser();
+            const token = localStorage.getItem('ciphra_token');
+
+            try {
+                const response = await fetch(`${API_BASE}/api/user/save-profile`, {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': token
+                    },
+                    body: JSON.stringify({ email: user.email, profile })
+                });
+
+                if (response.ok) {
+                    // Guardar localmente también
+                    user.profile = profile;
+                    localStorage.setItem('ciphra_user', JSON.stringify(user));
+                    window.location.href = 'index.html';
+                }
+            } catch (err) {
+                alert("Error al guardar el perfil");
+            }
+        });
+    </script>
+</body>
+</html>

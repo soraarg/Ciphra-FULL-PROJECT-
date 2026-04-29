@@ -1,0 +1,342 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Iniciar Sesión | Ciphra</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600&family=League+Spartan:wght@600;700;800&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <link rel="stylesheet" href="ciphra.css">
+    <style>
+        .login-page {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 2rem;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .login-card {
+            width: 100%;
+            max-width: 440px;
+            z-index: 10;
+        }
+
+        .login-header {
+            text-align: center;
+            margin-bottom: 2.5rem;
+        }
+
+        .login-logo {
+            font-family: var(--font-logo);
+            font-size: 2.2rem;
+            font-weight: 800;
+            letter-spacing: 0.15em;
+            margin-bottom: 0.5rem;
+            display: block;
+            text-decoration: none;
+        }
+
+        .login-header h2 {
+            font-size: 1.5rem;
+            font-weight: 500;
+            color: var(--text-primary);
+            letter-spacing: -0.02em;
+        }
+
+        .login-header p {
+            color: var(--text-secondary);
+            font-size: 0.95rem;
+            margin-top: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 0.85rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+            margin-bottom: 0.5rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+        }
+
+        .input-wrapper {
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        .input-wrapper i {
+            position: absolute;
+            left: 1rem;
+            color: var(--text-muted);
+            width: 18px;
+            pointer-events: none;
+        }
+
+        .form-input {
+            width: 100%;
+            background: rgba(0, 0, 0, 0.3);
+            border: 1px solid var(--border-light);
+            border-radius: 12px;
+            padding: 0.8rem 1rem 0.8rem 3rem;
+            color: var(--text-primary);
+            font-family: var(--font-ui);
+            font-size: 1rem;
+            transition: all 0.2s;
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--ciphra-yellow);
+            background: rgba(0, 0, 0, 0.5);
+            box-shadow: 0 0 0 4px rgba(255, 215, 0, 0.1);
+        }
+
+        .form-actions {
+            margin-top: 2rem;
+        }
+
+        .btn-login {
+            width: 100%;
+            padding: 1rem;
+            background: var(--text-primary);
+            color: var(--bg-base);
+            border: none;
+            border-radius: 12px;
+            font-weight: 600;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+
+        .btn-login:hover {
+            transform: translateY(-2px);
+            background: var(--ciphra-yellow);
+            box-shadow: 0 10px 30px rgba(255, 215, 0, 0.2);
+        }
+
+        .login-footer {
+            margin-top: 2rem;
+            text-align: center;
+            font-size: 0.9rem;
+            color: var(--text-secondary);
+        }
+
+        .login-footer a {
+            color: var(--ciphra-yellow);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .login-footer a:hover {
+            text-decoration: underline;
+        }
+
+        .social-login {
+            margin-top: 2.5rem;
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 1rem;
+        }
+
+        .social-btn {
+            background: rgba(255, 255, 255, 0.03);
+            border: 1px solid var(--border-light);
+            padding: 0.75rem;
+            border-radius: 12px;
+            color: var(--text-primary);
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .social-btn:hover {
+            background: rgba(255, 255, 255, 0.08);
+            border-color: var(--border-focus);
+        }
+
+        .divider {
+            margin: 2rem 0;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            color: var(--text-muted);
+            font-size: 0.8rem;
+            text-transform: uppercase;
+            letter-spacing: 0.1em;
+        }
+
+        .divider::before, .divider::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border-light);
+        }
+
+        /* Ambient Liquid Blobs for Login */
+        .blob {
+            position: absolute;
+            filter: blur(80px);
+            opacity: 0.15;
+            z-index: 1;
+            border-radius: 50%;
+            background: var(--ciphra-yellow);
+        }
+
+        .blob-1 { width: 400px; height: 400px; top: -100px; right: -100px; animation: float 20s infinite alternate; }
+        .blob-2 { width: 300px; height: 300px; bottom: -50px; left: -50px; background: #4338ca; animation: float 15s infinite alternate-reverse; }
+
+        @keyframes float {
+            from { transform: translate(0, 0); }
+            to { transform: translate(50px, 50px); }
+        }
+    </style>
+</head>
+<body>
+    <div class="login-page">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+
+        <div class="login-card glass-card">
+            <header class="login-header">
+                <a href="index.html" class="login-logo">
+                    <span class="logo-text">CIP<span class="logo-accent">H</span>RA</span>
+                </a>
+                <h2>Bienvenido de nuevo</h2>
+                <p>Ingeniería y precisión aplicada a tu mente.</p>
+            </header>
+
+            <form id="login-form">
+                <div class="form-group">
+                    <label class="form-label">Correo Electrónico</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="mail"></i>
+                        <input type="email" class="form-input" placeholder="nombre@ejemplo.com" required>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label class="form-label">Contraseña</label>
+                    <div class="input-wrapper">
+                        <i data-lucide="lock"></i>
+                        <input type="password" class="form-input" placeholder="••••••••" required>
+                    </div>
+                </div>
+
+                <div class="form-actions">
+                    <button type="submit" class="btn-login">
+                        Iniciar Sesión <i data-lucide="arrow-right"></i>
+                    </button>
+                </div>
+            </form>
+
+            <div class="divider">o continuar con</div>
+
+            <div id="google-login-btn" style="margin-top: 1rem;"></div>
+
+            <div class="social-login">
+                <button class="social-btn">
+                    <i data-lucide="github"></i> GitHub
+                </button>
+                <button class="social-btn">
+                    <i data-lucide="mail"></i> Email
+                </button>
+            </div>
+
+            <div class="login-footer">
+                ¿No tienes una cuenta? <a href="#">Regístrate gratis</a>
+            </div>
+        </div>
+    </div>
+
+    <script src="auth.js"></script>
+    <script>
+        lucide.createIcons();
+        
+        const loginForm = document.getElementById('login-form');
+        const submitBtn = loginForm.querySelector('button');
+        const originalBtnHtml = submitBtn.innerHTML;
+
+        loginForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = e.target.querySelector('input[type="email"]').value;
+            const password = e.target.querySelector('input[type="password"]').value;
+            
+            // UI Feedback
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i data-lucide="loader-2" class="spin"></i> Verificando...';
+            lucide.createIcons();
+            
+            const result = await Auth.login(email, password);
+            
+            if (result.success) {
+                submitBtn.innerHTML = '<i data-lucide="check"></i> Éxito';
+                lucide.createIcons();
+                
+                const user = Auth.getUser();
+                setTimeout(() => {
+                    if (!user.profile) {
+                        window.location.href = 'onboarding.html';
+                    } else {
+                        window.location.href = 'index.html';
+                    }
+                }, 1000);
+            } else {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalBtnHtml;
+                alert(result.message || 'Error al iniciar sesión');
+                lucide.createIcons();
+            }
+        });
+
+        // Google Auth Integration
+        async function handleCredentialResponse(response) {
+            const payload = JSON.parse(atob(response.credential.split('.')[1]));
+            console.log("Google Payload:", payload);
+            
+            const result = await Auth.googleLogin(payload.email, payload.name);
+            if (result.success) {
+                const user = Auth.getUser();
+                if (!user.profile) {
+                    window.location.href = 'onboarding.html';
+                } else {
+                    window.location.href = 'index.html';
+                }
+            } else {
+                alert("Error al sincronizar con el servidor");
+            }
+        }
+
+        window.onload = function () {
+            const clientId = "322927025510-t2n29thpdofgu4o7tv2bs3h78rid8gso.apps.googleusercontent.com";
+            
+            google.accounts.id.initialize({
+                client_id: clientId,
+                callback: handleCredentialResponse
+            });
+            google.accounts.id.renderButton(
+                document.getElementById("google-login-btn"),
+                { theme: "outline", size: "large", width: "440" }  
+            );
+        }
+    </script>
+</body>
+</html>

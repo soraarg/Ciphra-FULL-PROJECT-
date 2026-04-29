@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quantum | Ciphra</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&family=League+Spartan:wght@600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    
+    <!-- KaTeX para fórmulas matemáticas -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.css">
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/katex.min.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/katex@0.16.9/dist/contrib/auto-render.min.js"></script>
+
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        /* Ajustes específicos para Quantum */
+        .solution-container {
+            line-height: 1.8;
+            font-size: 1.05rem;
+        }
+        
+        /* Estilos de Tooltips para Leyes/Conceptos */
+        .glossary-term {
+            color: var(--ciphra-yellow);
+            border-bottom: 1px dashed var(--ciphra-yellow);
+            cursor: help;
+            position: relative;
+            display: inline-block;
+            font-weight: 500;
+            transition: all 0.2s;
+        }
+        .glossary-term:hover {
+            color: #fff;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.8);
+        }
+        
+        .tooltip-card {
+            visibility: hidden;
+            width: 280px;
+            background: rgba(15, 15, 20, 0.6);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            color: #f1f5f9;
+            text-align: left;
+            border: 1px solid rgba(255, 215, 0, 0.2);
+            border-radius: 16px;
+            padding: 18px;
+            position: absolute;
+            z-index: 100;
+            bottom: 140%;
+            left: 50%;
+            transform: translateX(-50%) translateY(10px);
+            opacity: 0;
+            transition: all 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.6), 0 0 15px rgba(255, 215, 0, 0.1);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            pointer-events: none;
+        }
+
+        .glossary-term:hover .tooltip-card {
+            visibility: visible;
+            opacity: 1;
+            transform: translateX(-50%) translateY(0);
+        }
+
+        .solution-container h1, .solution-container h2, .solution-container h3 {
+            margin-top: 25px;
+            color: var(--primary);
+            font-family: 'League Spartan', sans-serif;
+        }
+        .solution-container p { margin-bottom: 15px; }
+        .solution-container ul { margin-left: 20px; margin-bottom: 15px; }
+        .solution-container code {
+            font-family: 'JetBrains Mono', monospace;
+            background: rgba(0,0,0,0.3);
+            padding: 2px 6px;
+            border-radius: 4px;
+        }
+    </style>
+    <script src="auth.js?v=2.1"></script>
+    <script>Auth.guard();</script>
+</head>
+<body>
+    <header class="app-header">
+        <div class="header-left">
+            <a href="index.html" class="logo">
+                <span class="logo-text">CIP<span class="logo-accent">H</span>RA</span>
+            </a>
+            <div class="app-name">Quantum</div>
+        </div>
+        <a href="index.html" style="font-size:0.85rem; color: var(--text-muted); text-decoration:none;">← Volver</a>
+    </header>
+
+    <main id="app-container">
+        <section id="view-setup" class="view active">
+            <div class="dashboard-grid">
+                
+                <!-- Área principal de trabajo -->
+                <div class="content-area glass-panel">
+                    <h2>Resolución Analítica</h2>
+                    <p class="subtitle">Plantea tu problema técnico, físico o matemático abajo.</p>
+                    
+                    <div class="input-group">
+                        <textarea id="quantum-input" placeholder="Ej: Calcula el torque necesario para mover una carga de 100kg con un brazo de palanca de 2 metros..."></textarea>
+                    </div>
+
+                    <div id="quantum-result" class="solution-container glass-panel hidden" style="margin-top: 20px; background: rgba(0,0,0,0.2);">
+                        <!-- El resultado se inyecta aquí -->
+                    </div>
+                </div>
+
+                <!-- Panel de configuración lateral -->
+                <aside class="settings-panel glass-panel">
+                    <h3>Configuración de Análisis</h3>
+                    
+                    <div class="setting-group">
+                        <label>Modo de Resolución</label>
+                        <select id="solve-mode">
+                            <option value="step">Paso a Paso (Detallado)</option>
+                            <option value="direct">Directo (Sólo Resultado)</option>
+                            <option value="theory">Teórico (Fundamentos)</option>
+                        </select>
+                    </div>
+
+                    <div class="setting-group">
+                        <label>Profundidad Técnica</label>
+                        <div class="segmented-control">
+                            <input type="radio" name="depth" id="depth-basic" value="basic">
+                            <label for="depth-basic">Básico</label>
+                            
+                            <input type="radio" name="depth" id="depth-eng" value="engineering" checked>
+                            <label for="depth-eng">Ingeniería</label>
+                            
+                            <input type="radio" name="depth" id="depth-res" value="research">
+                            <label for="depth-res">Rigor</label>
+                        </div>
+                    </div>
+
+                    <div class="setting-group toggle-group">
+                        <div class="toggle-info">
+                            <label for="show-formulas">Mostrar Fórmulas</label>
+                            <span>Usa notación LaTeX profesional.</span>
+                        </div>
+                        <label class="switch">
+                            <input type="checkbox" id="show-formulas" checked>
+                            <span class="slider"></span>
+                        </label>
+                    </div>
+
+                    <button id="btn-solve" class="primary-btn" onclick="solveProblem()">
+                        <i data-lucide="zap"></i> Iniciar Análisis Quantum
+                    </button>
+                    
+                    <div id="quantum-loader" class="hidden" style="text-align: center; margin-top: 20px; color: var(--primary); font-family: 'JetBrains Mono'; font-size: 0.8rem;">
+                        <span class="dot-typing" style="margin: 0 auto;"><div></div><div></div><div></div></span>
+                        PROCESANDO MATRIZ...
+                    </div>
+                </aside>
+            </div>
+        </section>
+    </main>
+
+    <!-- COMMANDER Floating Copilot -->
+    <button id="btn-commander" class="commander-fab">
+        <svg class="helmet-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M12 2a10 10 0 0 0-10 10v4a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-4a10 10 0 0 0-10-10z" />
+            <path d="M6 12h12" />
+        </svg>
+    </button>
+
+    <div id="commander-window" class="commander-window hidden">
+        <div class="commander-header">
+            <div class="commander-title">
+                <i data-lucide="cpu" style="width:16px; margin-right:8px"></i>
+                <span><strong>Ciphra COMMANDER 1.1</strong></span>
+            </div>
+            <button id="btn-close-commander" class="icon-btn"><i data-lucide="x"></i></button>
+        </div>
+        <div class="commander-body" id="commander-chat">
+            <div class="message ai-message">Hola. Soy <strong>Ciphra COMMANDER 1.1</strong>. ¿Necesitas ayuda con el planteo del problema?</div>
+        </div>
+        <div class="commander-input">
+            <input type="text" id="commander-input-field" placeholder="Pregúntale a COMMANDER...">
+            <button id="btn-send-commander"><i data-lucide="send"></i></button>
+        </div>
+    </div>
+
+    <script src="app.js?v=2.1"></script>
+    <script>
+        async function solveProblem() {
+            const input = document.getElementById('quantum-input').value.trim();
+            const resultBox = document.getElementById('quantum-result');
+            const btn = document.getElementById('btn-solve');
+            const loader = document.getElementById('quantum-loader');
+
+            if (!input) return;
+
+            btn.disabled = true;
+            btn.style.opacity = '0.5';
+            loader.classList.remove('hidden');
+            resultBox.classList.add('hidden');
+
+            try {
+                const response = await fetch('/api/quantum/solve', {
+                    method: 'POST',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': localStorage.getItem('ciphra_token')
+                    },
+                    body: JSON.stringify({ 
+                        problem: input,
+                        mode: document.getElementById('solve-mode').value,
+                        depth: document.querySelector('input[name="depth"]:checked').value
+                    })
+                });
+
+                const data = await response.json();
+                
+                // Procesar sintaxis de Glosario [[Termino|Definicion]]
+                let html = marked.parse(data.solution);
+                html = html.replace(/\[\[(.*?)\|(.*?)\]\]/g, (match, term, def) => {
+                    return `<span class="glossary-term">${term}<span class="tooltip-card">${def}</span></span>`;
+                });
+
+                resultBox.innerHTML = html;
+                resultBox.classList.remove('hidden');
+                
+                // Renderizar KaTeX
+                if (window.renderMathInElement) {
+                    renderMathInElement(resultBox, {
+                        delimiters: [
+                            {left: '$$', right: '$$', display: true},
+                            {left: '$', right: '$', display: false}
+                        ]
+                    });
+                }
+                
+                resultBox.scrollIntoView({ behavior: 'smooth' });
+
+            } catch (err) {
+                alert("⚠️ Error en el núcleo Quantum.");
+            } finally {
+                btn.disabled = false;
+                btn.style.opacity = '1';
+                loader.classList.add('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
