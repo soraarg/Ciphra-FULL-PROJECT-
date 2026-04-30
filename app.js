@@ -55,6 +55,49 @@ if (rangeCount) {
 
 if (uploadArea && fileInput) {
     uploadArea.addEventListener('click', () => fileInput.click());
+
+    // Drag and drop
+    uploadArea.addEventListener('dragover', (e) => { e.preventDefault(); uploadArea.classList.add('drag-over'); });
+    uploadArea.addEventListener('dragleave', () => uploadArea.classList.remove('drag-over'));
+    uploadArea.addEventListener('drop', (e) => {
+        e.preventDefault();
+        uploadArea.classList.remove('drag-over');
+        const file = e.dataTransfer.files[0];
+        if (file) handleFileUpload(file);
+    });
+
+    fileInput.addEventListener('change', (e) => {
+        const file = e.target.files[0];
+        if (file) handleFileUpload(file);
+    });
+}
+
+async function handleFileUpload(file) {
+    const topicInput = document.getElementById('topic-input');
+    const uploadArea = document.getElementById('upload-area');
+
+    // Feedback visual
+    uploadArea.innerHTML = `<i data-lucide="loader-2" class="animate-spin"></i><p>Leyendo <strong>${file.name}</strong>...</p>`;
+    if (typeof lucide !== 'undefined') lucide.createIcons();
+
+    const formData = new FormData();
+    formData.append('file', file);
+
+    try {
+        const res = await fetch('/api/mindshift/upload', { method: 'POST', body: formData });
+        const data = await res.json();
+
+        if (data.error) {
+            uploadArea.innerHTML = `<i data-lucide="alert-circle"></i><p style="color:#f87171">Error: ${data.error}</p>`;
+        } else {
+            // Poner el texto extraído en el textarea
+            if (topicInput) topicInput.value = data.text;
+            uploadArea.innerHTML = `<i data-lucide="check-circle" style="color:#4ade80"></i><p style="color:#4ade80"><strong>${file.name}</strong> cargado correctamente ✓</p><span class="upload-hint">${Math.round(data.text.length / 1000)}k caracteres extraídos</span>`;
+        }
+    } catch (err) {
+        uploadArea.innerHTML = `<i data-lucide="alert-circle"></i><p style="color:#f87171">Error de conexión al subir el archivo.</p>`;
+    }
+    if (typeof lucide !== 'undefined') lucide.createIcons();
 }
 
 // Navegación de vistas
@@ -161,12 +204,22 @@ function renderQuestion() {
     // Render HTML de pregunta
     let html = `<h3 class="question-text">${q.text}</h3>`;
     
-    if (q.type === 'multiple') {
+    // Renderizar opciones si existen (multiple choice o boolean)
+    if (q.options && q.options.length > 0) {
         html += `<div class="options-grid">
             ${q.options.map((opt, idx) => {
                 const isSelected = state.answers[q.id] === idx ? 'selected' : '';
                 return `<button class="option-btn ${isSelected}" onclick="selectOption(${q.id}, ${idx})">${opt}</button>`;
             }).join('')}
+        </div>`;
+    } else if (q.type === 'fill' || q.type === 'short') {
+        const savedVal = state.answers[q.id] || '';
+        html += `<div class="options-grid">
+            <input type="text" class="fill-input" 
+                placeholder="Escribe tu respuesta aquí..." 
+                value="${savedVal}"
+                oninput="state.answers[${q.id}] = this.value"
+                style="background: rgba(255,255,255,0.05); border: 1px solid rgba(255,255,255,0.15); border-radius: 12px; padding: 1rem 1.2rem; color: white; font-size: 1rem; width: 100%; outline: none;">
         </div>`;
     }
 
@@ -297,11 +350,36 @@ function finishExam() {
 
 if (btnRestart) {
     btnRestart.addEventListener('click', () => {
+        // Limpiar textarea
         const topicInput = document.getElementById('topic-input');
-        if(topicInput) topicInput.value = '';
+        if (topicInput) topicInput.value = '';
+        
+        // Resetear el área de upload a su estado original
+        const uploadArea = document.getElementById('upload-area');
+        const fileInput = document.getElementById('file-upload');
+        if (uploadArea) {
+            uploadArea.innerHTML = `
+                <i data-lucide="file-up"></i>
+                <p>Haz clic o arrastra tus archivos aquí</p>
+                <span class="upload-hint">Imágenes, PDFs, Word o Excel</span>
+                <input type="file" id="file-upload" accept="image/*,.pdf,.doc,.docx,.xls,.xlsx" hidden>
+            `;
+            if (typeof lucide !== 'undefined') lucide.createIcons();
+            // Re-bindear el nuevo input
+            const newFileInput = document.getElementById('file-upload');
+            if (newFileInput) {
+                newFileInput.addEventListener('change', (e) => {
+                    const file = e.target.files[0];
+                    if (file) handleFileUpload(file);
+                });
+                uploadArea.addEventListener('click', () => newFileInput.click());
+            }
+        }
+        
         showView('setup');
     });
 }
 
 // COMMANDER Logic - Managed by index.html for Landing Page
 // (Removed redundant code to avoid conflicts)
+
