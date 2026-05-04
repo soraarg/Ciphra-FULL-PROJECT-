@@ -8,10 +8,14 @@ import json
 import uuid
 from datetime import datetime
 from dotenv import load_dotenv
+import base64
+import hashlib
+from cryptography.fernet import Fernet
 
 load_dotenv()
 api_key = os.getenv("GEMINI_API_KEY")
 
+# --- INICIALIZACIÓN ROBUSTA DEL MOTOR ---
 model = None
 model_candidates = [
     'models/gemini-3.1-flash-lite-preview',
@@ -28,7 +32,9 @@ if api_key:
                 temp_model = genai.GenerativeModel(m_name)
                 temp_model.generate_content("ping", generation_config={"max_output_tokens": 1})
                 model = temp_model
-                print(f"🚀 ENGINE START {m_name}")
+                print("\n----------------------------------")
+                print("- G O O D   E N G I N E  S T A R T-")
+                print("----------------------------------\n")
                 break
             except: continue
     except Exception as e:
@@ -37,31 +43,70 @@ if api_key:
 app = FastAPI(title="Ciphra COMMANDER 1.2")
 app.add_middleware(CORSMiddleware, allow_origins=["*"], allow_methods=["*"], allow_headers=["*"])
 
+import auth_api
+app.include_router(auth_api.router, prefix="/api/auth")
+
+
+# --- ENCRYPTION SETUP ---
+fernet_key = base64.urlsafe_b64encode(hashlib.sha256(api_key.encode()).digest()) if api_key else Fernet.generate_key()
+fernet = Fernet(fernet_key)
+
+def encrypt_data(data: dict) -> bytes:
+    return fernet.encrypt(json.dumps(data).encode())
+
+def decrypt_data(data: bytes) -> dict:
+    try:
+        return json.loads(fernet.decrypt(data).decode())
+    except Exception:
+        # Migración: si falla desencriptar, asumir que es JSON plano
+        return json.loads(data.decode())
+
 CHATS_FILE = "chats.json"
 
 def load_chats():
     if os.path.exists(CHATS_FILE):
-        with open(CHATS_FILE, "r") as f: return json.load(f)
+        with open(CHATS_FILE, "rb") as f: return decrypt_data(f.read())
     return {}
 
 def save_chats(chats):
-    with open(CHATS_FILE, "w") as f: json.dump(chats, f, indent=4)
+    with open(CHATS_FILE, "wb") as f: f.write(encrypt_data(chats))
+
+def get_user_from_token(request: Request) -> str:
+    """Resuelve el email del usuario a partir del token de sesión."""
+    token = request.headers.get("Authorization", "")
+    if not token:
+        return None
+    # Tokens viejos (retrocompatibilidad): no hay email asociado
+    if token.startswith("token_"):
+        return token 
+    
+    # Para tokens de Google, el auth_api maneja sessions.json
+    # Aquí simplemente devolvemos el token para que el backend lo use como owner
+    return token
 
 # --- API CHATS ---
 
 @app.get("/api/chats")
-async def list_chats():
+async def list_chats(request: Request):
+    owner = request.headers.get("Authorization", "anonymous")
     chats = load_chats()
-    return [{"id": cid, "title": data["title"], "created_at": data["created_at"]} for cid, data in chats.items()]
+    user_chats = [
+        {"id": cid, "title": data["title"], "created_at": data["created_at"]}
+        for cid, data in chats.items()
+        if data.get("owner") == owner
+    ]
+    return user_chats
 
 @app.post("/api/chats/create")
-async def create_chat():
+async def create_chat(request: Request):
+    owner = request.headers.get("Authorization", "anonymous")
     chats = load_chats()
     chat_id = str(uuid.uuid4())
     chats[chat_id] = {
         "title": "Nuevo chat",
         "created_at": datetime.now().isoformat(),
-        "messages": []
+        "messages": [],
+        "owner": owner
     }
     save_chats(chats)
     return {"chat_id": chat_id}
@@ -117,142 +162,107 @@ async def delete_chat(chat_id: str):
         return {"status": "deleted"}
     return JSONResponse({"error": "No encontrado"}, status_code=404)
 
-import hashlib
+# --- MINDSHIFT ENDPOINTS ---
 
-USERS_FILE = "users.json"
-
-def load_users():
-    if os.path.exists(USERS_FILE):
-        with open(USERS_FILE, "r") as f: return json.load(f)
-    return {}
-
-def save_users(users):
-    with open(USERS_FILE, "w") as f: json.dump(users, f, indent=4)
-
-def hash_password(password: str) -> str:
-    return hashlib.sha256(password.encode()).hexdigest()
-
-@app.post("/api/auth/login")
-async def auth_login(request: Request):
-    data = await request.json()
-    email = data.get("email", "")
-    password = data.get("password", "")
+@app.post("/api/mindshift/upload")
+async def mindshift_upload(request: Request):
+    """Extrae texto de archivos PDF, DOCX, XLSX o imagen y lo devuelve como texto plano."""
+    import io
+    from fastapi import UploadFile
+    form = await request.form()
+    file: UploadFile = form.get("file")
+    if not file:
+        return JSONResponse({"error": "No se recibió archivo"}, status_code=400)
     
-    users = load_users()
-    if email not in users or users[email]["password"] != hash_password(password):
-        return JSONResponse({"success": False, "message": "Credenciales inválidas"}, status_code=401)
-        
-    token = f"token_{hashlib.md5(email.encode()).hexdigest()}"
-    return {"success": True, "token": token, "user": {"email": email}}
+    content = await file.read()
+    filename = file.filename.lower()
+    extracted = ""
 
-@app.post("/api/auth/register")
-async def auth_register(request: Request):
-    data = await request.json()
-    email = data.get("email", "")
-    password = data.get("password", "")
-    
-    if not email or not password:
-        return JSONResponse({"success": False, "message": "Faltan datos"}, status_code=400)
-        
-    users = load_users()
-    if email in users:
-        return JSONResponse({"success": False, "message": "Usuario ya registrado"}, status_code=400)
-        
-    users[email] = {
-        "password": hash_password(password),
-        "created_at": datetime.now().isoformat()
-    }
-    save_users(users)
-    
-    token = f"token_{hashlib.md5(email.encode()).hexdigest()}"
-    return {"success": True, "token": token, "user": {"email": email}}
-
-@app.post("/api/auth/google-login")
-async def auth_google(request: Request):
-    data = await request.json()
-    email = data.get("email", "admin@ciphra.ai")
-    token = f"token_{hashlib.md5(email.encode()).hexdigest()}"
-    return {"success": True, "token": token, "user": {"email": email}}
-
-@app.post("/api/user/save-profile")
-async def save_profile(request: Request):
-    data = await request.json()
-    # Aceptamos todo en la demo para no bloquear el onboarding
-    return {"success": True, "message": "Perfil guardado correctamente"}
-
-@app.get("/api/auth/check")
-async def auth_check(request: Request):
-    token = request.headers.get("Authorization")
-    if token and token.startswith("token_"):
-        return {"authenticated": True}
-    return JSONResponse({"authenticated": False}, status_code=401)
-
-@app.post("/api/quantum/solve")
-async def quantum_solve(request: Request):
-    if not model: return {"solution": "⚠️ Motor de IA desconectado."}
-    data = await request.json()
-    problem = data.get("problem")
-    
-    quantum_system_prompt = """⚛️ CIPHRA QUANTUM — COMMANDER INSTRUCTION LAYER
-    You are Ciphra COMMANDER running in QUANTUM MODE.
-    Solve academic problems with maximum correctness and clear step-by-step reasoning using LaTeX.
-    
-    REQUIRED FORMAT:
-    📌 Problema
-    🧾 Datos
-    🧠 Estrategia
-    🧮 Resolución paso a paso
-    ✅ Resultado final
-    """
     try:
-        response = model.generate_content(f"{quantum_system_prompt}\n\nProblema: {problem}")
-        return {"solution": response.text}
+        if filename.endswith(".pdf"):
+            import PyPDF2
+            reader = PyPDF2.PdfReader(io.BytesIO(content))
+            extracted = "\n".join(page.extract_text() or "" for page in reader.pages)
+        
+        elif filename.endswith(".docx"):
+            import docx
+            doc = docx.Document(io.BytesIO(content))
+            extracted = "\n".join(p.text for p in doc.paragraphs if p.text.strip())
+        
+        elif filename.endswith((".xlsx", ".xls")):
+            import openpyxl
+            wb = openpyxl.load_workbook(io.BytesIO(content), read_only=True)
+            rows = []
+            for ws in wb.worksheets:
+                for row in ws.iter_rows(values_only=True):
+                    row_text = " | ".join(str(c) for c in row if c is not None)
+                    if row_text.strip():
+                        rows.append(row_text)
+            extracted = "\n".join(rows)
+        
+        elif filename.endswith((".png", ".jpg", ".jpeg", ".webp")):
+            if model:
+                from PIL import Image as PILImage
+                img = PILImage.open(io.BytesIO(content))
+                response = model.generate_content([
+                    "Extrae TODO el texto visible en esta imagen, manteniendo el formato lo mejor posible.",
+                    img
+                ])
+                extracted = response.text
+            else:
+                return JSONResponse({"error": "Motor IA offline para imágenes"}, status_code=503)
+        else:
+            return JSONResponse({"error": f"Formato no soportado: {filename}"}, status_code=415)
+
+        if not extracted.strip():
+            return JSONResponse({"error": "No se pudo extraer texto del archivo."}, status_code=422)
+
+        return {"text": extracted[:15000]}
+
     except Exception as e:
-        return {"solution": f"Error analítico: {str(e)}"}
+        return JSONResponse({"error": f"Error procesando archivo: {str(e)}"}, status_code=500)
 
 @app.post("/api/mindshift/generate")
 async def mindshift_generate(request: Request):
     if not model: return JSONResponse({"error": "Motor offline"}, status_code=503)
     data = await request.json()
-    topic = data.get("topic", "Ingeniería general")
-    count = data.get("count", 3)
-    difficulty = data.get("difficulty", "medium")
+    topic = data.get("topic", "Cualquier tema")
+    count = data.get("count", 5)
+    difficulty = data.get("difficulty", "Intermedio")
     
-    prompt = f"""Genera un examen de opción múltiple sobre {topic}. Dificultad: {difficulty}. Cantidad de preguntas: {count}.
-    Devuelve ÚNICAMENTE un JSON válido con esta estructura exacta, sin bloques de código ni markdown:
+    prompt = f"""
+    Genera un examen de {count} preguntas sobre: {topic}.
+    Dificultad: {difficulty}.
+    Formato JSON ESTRICTO:
     {{
         "questions": [
             {{
                 "id": 1,
+                "type": "multiple",
                 "text": "Pregunta...",
-                "options": ["Opcion 1", "Opcion 2", "Opcion 3", "Opcion 4"],
+                "options": ["A", "B", "C", "D"],
                 "correctIndex": 0
             }}
         ]
     }}
+    Responde SOLO con el JSON.
     """
-    
-    dummy_questions = [
-        {"id": 1, "text": f"¿Cuál de las siguientes opciones describe mejor el concepto clave de {topic}?", "options": ["Concepto A", "Concepto B", "Concepto C", "Concepto D"], "correctIndex": 0},
-        {"id": 2, "text": "¿Qué fórmula o principio fundamental se asocia típicamente con esto?", "options": ["Principio 1", "Fórmula 2", "Teorema 3", "Ley 4"], "correctIndex": 1}
-    ]
     
     try:
         response = model.generate_content(prompt)
         text = response.text.replace("```json", "").replace("```", "").strip()
         result = json.loads(text)
         questions = result.get("questions", [])
-        if not questions or len(questions) == 0:
-            return {"questions": dummy_questions}
+        for q in questions:
+            if "type" not in q: q["type"] = "multiple"
         return {"questions": questions}
     except Exception as e:
-        print(f"Mindshift Parse Error: {e}")
-        return {"questions": dummy_questions}
+        return JSONResponse({"error": f"Error generando test: {str(e)}"}, status_code=500)
 
 # Estáticos
 app.mount("/", StaticFiles(directory="./", html=True), name="static")
 
 if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-
+    port = int(os.getenv("PORT", 8000))
+    uvicorn.run(app, host="0.0.0.0", port=port)
